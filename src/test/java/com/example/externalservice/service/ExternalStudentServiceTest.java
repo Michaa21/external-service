@@ -3,6 +3,7 @@ package com.example.externalservice.service;
 import com.example.externalservice.domain.ExternalStudent;
 import com.example.externalservice.dto.ExternalStudentRequest;
 import com.example.externalservice.dto.ExternalStudentResponse;
+import com.example.externalservice.mapper.ExternalStudentMapper;
 import com.example.externalservice.repository.ExternalStudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,27 +24,48 @@ import static org.mockito.Mockito.when;
 class ExternalStudentServiceTest {
 
     @Mock
-    private ExternalStudentRepository externalStudentRepository;
+    ExternalStudentRepository externalStudentRepository;
+
+    @Mock
+    ExternalStudentMapper externalStudentMapper;
 
     @InjectMocks
-    private ExternalStudentService externalStudentService;
+    ExternalStudentService externalStudentService;
 
     @Test
     void create_shouldReturnResponseWithGeneratedExtraInfo() {
         UUID studentId = UUID.randomUUID();
 
-        ExternalStudentRequest request = new ExternalStudentRequest(studentId, "Bob");
+        ExternalStudentRequest request = new ExternalStudentRequest(
+                studentId,
+                "Bob",
+                "bob@mail.com",
+                18
+        );
+
+        ExternalStudent externalStudent = new ExternalStudent();
+        externalStudent.setStudentId(studentId);
+        externalStudent.setExtraInfo("extra-info-for-Bob");
 
         ExternalStudent savedStudent = new ExternalStudent();
         savedStudent.setStudentId(studentId);
         savedStudent.setExtraInfo("extra-info-for-Bob");
 
-        when(externalStudentRepository.save(any(ExternalStudent.class))).thenReturn(savedStudent);
+        ExternalStudentResponse response =
+                new ExternalStudentResponse(studentId, "extra-info-for-Bob");
+
+        when(externalStudentMapper.toEntity(request)).thenReturn(externalStudent);
+        when(externalStudentRepository.save(externalStudent)).thenReturn(savedStudent);
+        when(externalStudentMapper.toResponse(savedStudent)).thenReturn(response);
 
         ExternalStudentResponse result = externalStudentService.create(request);
 
         assertEquals(studentId, result.getStudentId());
         assertEquals("extra-info-for-Bob", result.getExtraInfo());
+
+        verify(externalStudentMapper).toEntity(request);
+        verify(externalStudentRepository).save(externalStudent);
+        verify(externalStudentMapper).toResponse(savedStudent);
     }
 
     @Test
@@ -55,13 +76,21 @@ class ExternalStudentServiceTest {
         externalStudent.setStudentId(studentId);
         externalStudent.setExtraInfo("extra-info-for-Bob");
 
+        ExternalStudentResponse response =
+                new ExternalStudentResponse(studentId, "extra-info-for-Bob");
+
         when(externalStudentRepository.findByStudentId(studentId))
                 .thenReturn(Optional.of(externalStudent));
+        when(externalStudentMapper.toResponse(externalStudent))
+                .thenReturn(response);
 
         ExternalStudentResponse result = externalStudentService.getByStudentId(studentId);
 
         assertEquals(studentId, result.getStudentId());
         assertEquals("extra-info-for-Bob", result.getExtraInfo());
+
+        verify(externalStudentRepository).findByStudentId(studentId);
+        verify(externalStudentMapper).toResponse(externalStudent);
     }
 
     @Test
@@ -73,6 +102,8 @@ class ExternalStudentServiceTest {
 
         assertThrows(EntityNotFoundException.class,
                 () -> externalStudentService.getByStudentId(studentId));
+
+        verify(externalStudentRepository).findByStudentId(studentId);
     }
 
     @Test

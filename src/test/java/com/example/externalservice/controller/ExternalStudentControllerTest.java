@@ -21,13 +21,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ExternalStudentControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @MockBean
-    private ExternalStudentService externalStudentService;
+    ExternalStudentService externalStudentService;
 
     @Test
-    void create_shouldReturn200() throws Exception {
+    void create_shouldReturn201() throws Exception {
         UUID studentId = UUID.randomUUID();
 
         ExternalStudentResponse response =
@@ -41,10 +41,12 @@ class ExternalStudentControllerTest {
                         .content("""
                                 {
                                   "studentId": "%s",
-                                  "name": "Bob"
+                                  "name": "Bob",
+                                  "email": "bob@mail.com",
+                                  "age": 18
                                 }
                                 """.formatted(studentId)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.studentId").value(studentId.toString()))
                 .andExpect(jsonPath("$.extraInfo").value("extra-info-for-Bob"));
@@ -86,5 +88,21 @@ class ExternalStudentControllerTest {
         mockMvc.perform(delete("/external/students/{studentId}", studentId))
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(""));
+    }
+
+    @Test
+    void create_shouldReturn400_whenRequestInvalid() throws Exception {
+        mockMvc.perform(post("/external/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "studentId": null,
+                                  "name": "",
+                                  "email": "wrong-email",
+                                  "age": 5
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
     }
 }
