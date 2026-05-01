@@ -52,7 +52,13 @@ class ExternalStudentServiceTest {
         savedStudent.setExtraInfo("extra-info-for-Bob");
 
         ExternalStudentResponse response =
-                new ExternalStudentResponse(studentId, "extra-info-for-Bob");
+                new ExternalStudentResponse(
+                        studentId,
+                        "Bob",
+                        "bob@mail.com",
+                        18,
+                        "extra-info-for-Bob"
+                );
 
         when(externalStudentMapper.toEntity(request)).thenReturn(externalStudent);
         when(externalStudentRepository.save(externalStudent)).thenReturn(savedStudent);
@@ -77,7 +83,13 @@ class ExternalStudentServiceTest {
         externalStudent.setExtraInfo("extra-info-for-Bob");
 
         ExternalStudentResponse response =
-                new ExternalStudentResponse(studentId, "extra-info-for-Bob");
+                new ExternalStudentResponse(
+                        studentId,
+                        "Bob",
+                        "bob@mail.com",
+                        18,
+                        "extra-info-for-Bob"
+                );
 
         when(externalStudentRepository.findByStudentId(studentId))
                 .thenReturn(Optional.of(externalStudent));

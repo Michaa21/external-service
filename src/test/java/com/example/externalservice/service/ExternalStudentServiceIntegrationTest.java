@@ -76,6 +76,9 @@ class ExternalStudentServiceIntegrationTest {
         ExternalStudent externalStudent = new ExternalStudent();
         externalStudent.setStudentId(studentId);
         externalStudent.setExtraInfo("extra-info-for-Bob");
+        externalStudent.setName("Bob");
+        externalStudent.setEmail("bob@mail.com");
+        externalStudent.setAge(18);
 
         externalStudentRepository.save(externalStudent);
 
@@ -101,6 +104,9 @@ class ExternalStudentServiceIntegrationTest {
         ExternalStudent externalStudent = new ExternalStudent();
         externalStudent.setStudentId(studentId);
         externalStudent.setExtraInfo("extra-info-for-Bob");
+        externalStudent.setName("Bob");
+        externalStudent.setEmail("bob@mail.com");
+        externalStudent.setAge(18);
 
         externalStudentRepository.save(externalStudent);
 

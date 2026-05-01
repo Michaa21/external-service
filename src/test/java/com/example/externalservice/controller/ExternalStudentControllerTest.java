@@ -31,7 +31,13 @@ class ExternalStudentControllerTest {
         UUID studentId = UUID.randomUUID();
 
         ExternalStudentResponse response =
-                new ExternalStudentResponse(studentId, "extra-info-for-Bob");
+                new ExternalStudentResponse(
+                        studentId,
+                        "Bob",
+                        "bob@mail.com",
+                        18,
+                        "extra-info-for-Bob"
+                );
 
         when(externalStudentService.create(org.mockito.ArgumentMatchers.any()))
                 .thenReturn(response);
@@ -57,7 +63,13 @@ class ExternalStudentControllerTest {
         UUID studentId = UUID.randomUUID();
 
         ExternalStudentResponse response =
-                new ExternalStudentResponse(studentId, "extra-info-for-Bob");
+                new ExternalStudentResponse(
+                        studentId,
+                        "Bob",
+                        "bob@mail.com",
+                        18,
+                        "extra-info-for-Bob"
+                );
 
         when(externalStudentService.getByStudentId(studentId)).thenReturn(response);
 

@@ -9,6 +9,7 @@ import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ExternalStudentMapper {
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "extraInfo", expression = "java(\"extra-info-for-\" + request.getName())")
     ExternalStudent toEntity(ExternalStudentRequest request);

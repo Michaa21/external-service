@@ -12,5 +12,8 @@ import java.util.UUID;
 public class ExternalStudentResponse {
 
     private UUID studentId;
+    private String name;
+    private String email;
+    private Integer age;
     private String extraInfo;
 }
