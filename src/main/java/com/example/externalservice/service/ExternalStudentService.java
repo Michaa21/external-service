@@ -36,16 +36,39 @@ public class ExternalStudentService {
 
     @Transactional
     public ExternalStudentResponse create(ExternalStudentRequest request) {
-        ExternalStudent externalStudent = externalStudentMapper.toEntity(request);
-        ExternalStudent saved = externalStudentRepository.save(externalStudent);
-        log.info("External student with studentId {} created", saved.getStudentId());
+        return externalStudentRepository.findByStudentId(request.getStudentId())
+                .map(existingStudent -> {
+                    log.info(
+                            "External student with studentId {} already exists",
+                            existingStudent.getStudentId()
+                    );
 
-        return externalStudentMapper.toResponse(saved);
+                    return externalStudentMapper.toResponse(existingStudent);
+                })
+                .orElseGet(() -> createNewExternalStudent(request));
     }
 
     @Transactional
     public void deleteByStudentId(UUID studentId) {
-        externalStudentRepository.deleteByStudentId(studentId);
-        log.info("External student with studentId {} deleted", studentId);
+        externalStudentRepository.findByStudentId(studentId)
+                .ifPresentOrElse(
+                        externalStudent -> {
+                            externalStudentRepository.delete(externalStudent);
+                            log.info("External student with studentId {} deleted", studentId);
+                        },
+                        () -> log.info(
+                                "External student with studentId {} already absent, delete skipped",
+                                studentId
+                        )
+                );
+    }
+
+    private ExternalStudentResponse createNewExternalStudent(ExternalStudentRequest request) {
+        ExternalStudent externalStudent = externalStudentMapper.toEntity(request);
+        ExternalStudent saved = externalStudentRepository.save(externalStudent);
+
+        log.info("External student with studentId {} created", saved.getStudentId());
+
+        return externalStudentMapper.toResponse(saved);
     }
 }

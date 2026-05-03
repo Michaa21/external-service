@@ -17,8 +17,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalStudentServiceTest {
@@ -60,6 +59,8 @@ class ExternalStudentServiceTest {
                         "extra-info-for-Bob"
                 );
 
+        when(externalStudentRepository.findByStudentId(studentId))
+                .thenReturn(Optional.empty());
         when(externalStudentMapper.toEntity(request)).thenReturn(externalStudent);
         when(externalStudentRepository.save(externalStudent)).thenReturn(savedStudent);
         when(externalStudentMapper.toResponse(savedStudent)).thenReturn(response);
@@ -69,9 +70,56 @@ class ExternalStudentServiceTest {
         assertEquals(studentId, result.getStudentId());
         assertEquals("extra-info-for-Bob", result.getExtraInfo());
 
+        verify(externalStudentRepository).findByStudentId(studentId);
         verify(externalStudentMapper).toEntity(request);
         verify(externalStudentRepository).save(externalStudent);
         verify(externalStudentMapper).toResponse(savedStudent);
+    }
+
+    @Test
+    void create_shouldReturnExistingStudent_whenStudentAlreadyExists() {
+        UUID studentId = UUID.randomUUID();
+
+        ExternalStudentRequest request = new ExternalStudentRequest(
+                studentId,
+                "Bob",
+                "bob@mail.com",
+                18
+        );
+
+        ExternalStudent existingStudent = new ExternalStudent();
+        existingStudent.setStudentId(studentId);
+        existingStudent.setName("Bob");
+        existingStudent.setEmail("bob@mail.com");
+        existingStudent.setAge(18);
+        existingStudent.setExtraInfo("extra-info-for-Bob");
+
+        ExternalStudentResponse response =
+                new ExternalStudentResponse(
+                        studentId,
+                        "Bob",
+                        "bob@mail.com",
+                        18,
+                        "extra-info-for-Bob"
+                );
+
+        when(externalStudentRepository.findByStudentId(studentId))
+                .thenReturn(Optional.of(existingStudent));
+        when(externalStudentMapper.toResponse(existingStudent))
+                .thenReturn(response);
+
+        ExternalStudentResponse result = externalStudentService.create(request);
+
+        assertEquals(studentId, result.getStudentId());
+        assertEquals("Bob", result.getName());
+        assertEquals("bob@mail.com", result.getEmail());
+        assertEquals(18, result.getAge());
+        assertEquals("extra-info-for-Bob", result.getExtraInfo());
+
+        verify(externalStudentRepository).findByStudentId(studentId);
+        verify(externalStudentMapper).toResponse(existingStudent);
+        verify(externalStudentMapper, never()).toEntity(request);
+        verify(externalStudentRepository, never()).save(any(ExternalStudent.class));
     }
 
     @Test
@@ -119,11 +167,31 @@ class ExternalStudentServiceTest {
     }
 
     @Test
-    void deleteByStudentId_shouldCallRepository() {
+    void deleteByStudentId_shouldDeleteStudent_whenStudentExists() {
         UUID studentId = UUID.randomUUID();
+
+        ExternalStudent existingStudent = new ExternalStudent();
+        existingStudent.setStudentId(studentId);
+
+        when(externalStudentRepository.findByStudentId(studentId))
+                .thenReturn(Optional.of(existingStudent));
 
         externalStudentService.deleteByStudentId(studentId);
 
-        verify(externalStudentRepository).deleteByStudentId(studentId);
+        verify(externalStudentRepository).findByStudentId(studentId);
+        verify(externalStudentRepository).delete(existingStudent);
+    }
+
+    @Test
+    void deleteByStudentId_shouldDoNothing_whenStudentDoesNotExist() {
+        UUID studentId = UUID.randomUUID();
+
+        when(externalStudentRepository.findByStudentId(studentId))
+                .thenReturn(Optional.empty());
+
+        externalStudentService.deleteByStudentId(studentId);
+
+        verify(externalStudentRepository).findByStudentId(studentId);
+        verify(externalStudentRepository, never()).delete(any(ExternalStudent.class));
     }
 }
