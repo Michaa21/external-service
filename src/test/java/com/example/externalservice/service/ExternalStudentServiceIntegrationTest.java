@@ -70,6 +70,38 @@ class ExternalStudentServiceIntegrationTest {
     }
 
     @Test
+    void create_shouldReturnExistingStudent_whenStudentAlreadyExists() {
+        UUID studentId = UUID.randomUUID();
+
+        ExternalStudent existingStudent = new ExternalStudent();
+        existingStudent.setStudentId(studentId);
+        existingStudent.setName("Bob");
+        existingStudent.setEmail("bob@mail.com");
+        existingStudent.setAge(18);
+        existingStudent.setExtraInfo("extra-info-for-Bob");
+
+        externalStudentRepository.save(existingStudent);
+
+        ExternalStudentRequest request = new ExternalStudentRequest(
+                studentId,
+                "Alex",
+                "alex@mail.com",
+                25
+        );
+
+        ExternalStudentResponse result = externalStudentService.create(request);
+
+        assertNotNull(result);
+        assertEquals(studentId, result.getStudentId());
+        assertEquals("Bob", result.getName());
+        assertEquals("bob@mail.com", result.getEmail());
+        assertEquals(18, result.getAge());
+        assertEquals("extra-info-for-Bob", result.getExtraInfo());
+
+        assertEquals(1, externalStudentRepository.count());
+    }
+
+    @Test
     void getByStudentId_shouldReturnExternalStudent() {
         UUID studentId = UUID.randomUUID();
 
@@ -98,7 +130,7 @@ class ExternalStudentServiceIntegrationTest {
     }
 
     @Test
-    void deleteByStudentId_shouldDeleteExternalStudent() {
+    void compensateStudentCreation_shouldDeleteExternalStudent() {
         UUID studentId = UUID.randomUUID();
 
         ExternalStudent externalStudent = new ExternalStudent();
@@ -110,7 +142,16 @@ class ExternalStudentServiceIntegrationTest {
 
         externalStudentRepository.save(externalStudent);
 
-        externalStudentService.deleteByStudentId(studentId);
+        externalStudentService.compensateStudentCreation(studentId);
+
+        assertTrue(externalStudentRepository.findByStudentId(studentId).isEmpty());
+    }
+
+    @Test
+    void compensateStudentCreation_shouldDoNothing_whenStudentDoesNotExist() {
+        UUID studentId = UUID.randomUUID();
+
+        externalStudentService.compensateStudentCreation(studentId);
 
         assertTrue(externalStudentRepository.findByStudentId(studentId).isEmpty());
     }

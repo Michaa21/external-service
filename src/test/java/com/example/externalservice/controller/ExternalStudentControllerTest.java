@@ -12,8 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -92,14 +91,16 @@ class ExternalStudentControllerTest {
     }
 
     @Test
-    void delete_shouldReturn204() throws Exception {
+    void compensateStudentCreation_shouldReturn204() throws Exception {
         UUID studentId = UUID.randomUUID();
 
-        doNothing().when(externalStudentService).deleteByStudentId(studentId);
+        doNothing().when(externalStudentService).compensateStudentCreation(studentId);
 
-        mockMvc.perform(delete("/external/students/{studentId}", studentId))
+        mockMvc.perform(delete("/external/students/{studentId}/compensation", studentId))
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(""));
+
+        verify(externalStudentService).compensateStudentCreation(studentId);
     }
 
     @Test

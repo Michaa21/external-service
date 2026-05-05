@@ -49,15 +49,16 @@ public class ExternalStudentService {
     }
 
     @Transactional
-    public void deleteByStudentId(UUID studentId) {
+    public void compensateStudentCreation(UUID studentId) {
         externalStudentRepository.findByStudentId(studentId)
                 .ifPresentOrElse(
                         externalStudent -> {
                             externalStudentRepository.delete(externalStudent);
-                            log.info("External student with studentId {} deleted", studentId);
+                            log.info("External student with studentId {} deleted as saga compensation",
+                                    studentId);
                         },
                         () -> log.info(
-                                "External student with studentId {} already absent, delete skipped",
+                                "External student with studentId {} already absent, compensation skipped",
                                 studentId
                         )
                 );

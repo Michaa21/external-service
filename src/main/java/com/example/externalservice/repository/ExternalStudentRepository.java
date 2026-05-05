@@ -9,6 +9,4 @@ import java.util.UUID;
 public interface ExternalStudentRepository extends JpaRepository<ExternalStudent, UUID> {
 
     Optional<ExternalStudent> findByStudentId(UUID studentId);
-
-    void deleteByStudentId(UUID studentId);
 }

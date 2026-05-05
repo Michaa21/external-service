@@ -32,9 +32,9 @@ public class ExternalStudentController {
         return ResponseEntity.ok(externalStudentService.getByStudentId(studentId));
     }
 
-    @DeleteMapping("/{studentId}")
-    public ResponseEntity<Void> delete(@PathVariable @NotNull UUID studentId) {
-        externalStudentService.deleteByStudentId(studentId);
+    @DeleteMapping("/{studentId}/compensation")
+    public ResponseEntity<Void> compensateStudentCreation(@PathVariable @NotNull UUID studentId) {
+        externalStudentService.compensateStudentCreation(studentId);
         return ResponseEntity.noContent().build();
     }
 
