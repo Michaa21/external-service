@@ -1,10 +1,10 @@
-package com.example.externalservice.service;
+package com.example.externalservice;
 
-import com.example.externalservice.ExternalServiceApplicationTests;
 import com.example.externalservice.domain.ExternalStudent;
 import com.example.externalservice.dto.ExternalStudentRequest;
 import com.example.externalservice.dto.ExternalStudentResponse;
 import com.example.externalservice.repository.ExternalStudentRepository;
+import com.example.externalservice.service.ExternalStudentService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
